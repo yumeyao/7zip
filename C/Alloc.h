@@ -10,17 +10,26 @@
 extern "C" {
 #endif
 
+#ifdef _SZ_ALLOC_DEBUG
 void *MyAlloc(size_t size);
 void MyFree(void *address);
+#else
+#define MyAlloc(size) (size == 0 ? 0 : malloc(size))
+#define MyFree(address) (address == 0 ? 0 : free(address))
+#endif
 
 #ifdef _WIN32
 
+#ifdef _MSC_VER
+#define MY_FAST_CALL __fastcall
+#endif
+
 void SetLargePageSize();
 
-void *MidAlloc(size_t size);
-void MidFree(void *address);
-void *BigAlloc(size_t size);
-void BigFree(void *address);
+void * MY_FAST_CALL MidAlloc(size_t size);
+void MY_FAST_CALL MidFree(void *address);
+void * MY_FAST_CALL BigAlloc(size_t size);
+void MY_FAST_CALL BigFree(void *address);
 
 #else
 

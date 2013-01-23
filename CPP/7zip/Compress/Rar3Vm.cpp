@@ -107,13 +107,13 @@ CVm::CVm(): Mem(NULL) {}
 bool CVm::Create()
 {
   if (Mem == NULL)
-    Mem = (Byte *)::MyAlloc(kSpaceSize + 4);
+    Mem = (Byte *)MyAlloc(kSpaceSize + 4);
   return (Mem != NULL);
 }
 
 CVm::~CVm()
 {
-  ::MyFree(Mem);
+  MyFree(Mem);
 }
 
 // CVm::Execute can change CProgram object: it clears progarm if VM returns error.

@@ -6,8 +6,6 @@
 
 #include "NewHandler.h"
 
-// #define DEBUG_MEMORY_LEAK
-
 #ifndef DEBUG_MEMORY_LEAK
 
 #ifdef _WIN32
@@ -24,19 +22,6 @@ operator new(size_t size)
   return p;
 }
 
-void
-#ifdef _MSC_VER
-__cdecl
-#endif
-operator delete(void *p) throw()
-{
-  /*
-  if (p == 0)
-    return;
-  ::HeapFree(::GetProcessHeap(), 0, p);
-  */
-  ::free(p);
-}
 #endif
 
 #else

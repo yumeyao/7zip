@@ -138,7 +138,7 @@ enum
   CPU_FIRM_VIA
 };
 
-Bool x86cpuid_CheckAndRead(Cx86cpuid *p);
+Bool MY_FAST_CALL x86cpuid_CheckAndRead(Cx86cpuid *p);
 int x86cpuid_GetFirm(const Cx86cpuid *p);
 
 #define x86cpuid_GetFamily(p) (((p)->ver >> 8) & 0xFF00F)

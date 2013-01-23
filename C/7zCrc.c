@@ -8,7 +8,7 @@
 
 #ifdef MY_CPU_X86_OR_AMD64
   #define CRC_NUM_TABLES 8
-  UInt32 MY_FAST_CALL CrcUpdateT8(UInt32 v, const void *data, size_t size, const UInt32 *table);
+  UInt32 MY_FAST_CALL CrcUpdateT8(UInt32 v, const void *data, size_t size);
 #elif defined(MY_CPU_LE)
   #define CRC_NUM_TABLES 4
 #else
@@ -18,23 +18,11 @@
 #endif
 
 #ifndef MY_CPU_BE
-  UInt32 MY_FAST_CALL CrcUpdateT4(UInt32 v, const void *data, size_t size, const UInt32 *table);
+  UInt32 MY_FAST_CALL CrcUpdateT4(UInt32 v, const void *data, size_t size);
 #endif
 
-typedef UInt32 (MY_FAST_CALL *CRC_FUNC)(UInt32 v, const void *data, size_t size, const UInt32 *table);
-
-static CRC_FUNC g_CrcUpdate;
+CRC_FUNC g_CrcUpdate;
 UInt32 g_CrcTable[256 * CRC_NUM_TABLES];
-
-UInt32 MY_FAST_CALL CrcUpdate(UInt32 v, const void *data, size_t size)
-{
-  return g_CrcUpdate(v, data, size, g_CrcTable);
-}
-
-UInt32 MY_FAST_CALL CrcCalc(const void *data, size_t size)
-{
-  return g_CrcUpdate(CRC_INIT_VAL, data, size, g_CrcTable) ^ CRC_INIT_VAL;
-}
 
 void MY_FAST_CALL CrcGenerateTable()
 {

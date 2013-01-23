@@ -107,8 +107,10 @@ typedef int Bool;
 
 #if _MSC_VER >= 1300
 #define MY_NO_INLINE __declspec(noinline)
+#define MY_INLINE __forceinline
 #else
 #define MY_NO_INLINE
+#define MY_INLINE
 #endif
 
 #define MY_CDECL __cdecl
@@ -142,8 +144,11 @@ typedef struct
 } ISeqInStream;
 
 /* it can return SZ_ERROR_INPUT_EOF */
-SRes SeqInStream_Read(ISeqInStream *stream, void *buf, size_t size);
 SRes SeqInStream_Read2(ISeqInStream *stream, void *buf, size_t size, SRes errorType);
+MY_INLINE SRes SeqInStream_Read(ISeqInStream *stream, void *buf, size_t size)
+{
+  return SeqInStream_Read2(stream, buf, size, SZ_ERROR_INPUT_EOF);
+}
 SRes SeqInStream_ReadByte(ISeqInStream *stream, Byte *buf);
 
 typedef struct
@@ -185,7 +190,10 @@ SRes LookInStream_SeekTo(ILookInStream *stream, UInt64 offset);
 
 /* reads via ILookInStream::Read */
 SRes LookInStream_Read2(ILookInStream *stream, void *buf, size_t size, SRes errorType);
-SRes LookInStream_Read(ILookInStream *stream, void *buf, size_t size);
+MY_INLINE SRes LookInStream_Read(ILookInStream *stream, void *buf, size_t size)
+{
+  return LookInStream_Read2(stream, buf, size, SZ_ERROR_INPUT_EOF);
+}
 
 #define LookToRead_BUF_SIZE (1 << 14)
 
@@ -199,7 +207,10 @@ typedef struct
 } CLookToRead;
 
 void LookToRead_CreateVTable(CLookToRead *p, int lookahead);
-void LookToRead_Init(CLookToRead *p);
+MY_INLINE void LookToRead_Init(CLookToRead *p)
+{
+  p->pos = p->size = 0;
+}
 
 typedef struct
 {

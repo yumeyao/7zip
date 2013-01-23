@@ -43,7 +43,7 @@ COMPL_ASM = $(MY_ML) $** $O/$(*B).obj
 COMPL_ASM = $(MY_ML) -c -Fo$O/ $**
 !ENDIF
 
-CFLAGS = $(CFLAGS) -nologo -c -Fo$O/ -WX -EHsc -Gy -GR-
+CFLAGS = $(CFLAGS) -nologo -c -Fo$O/ -WX -EHsc -Gy -GR- -GS-
 
 !IFDEF MY_STATIC_LINK
 !IFNDEF MY_SINGLE_THREAD
@@ -59,7 +59,7 @@ CFLAGS = $(CFLAGS) -W4 -GS- -Zc:forScope
 CFLAGS = $(CFLAGS) -W3
 !ENDIF
 
-CFLAGS_O1 = $(CFLAGS) -O1
+CFLAGS_O1 = $(CFLAGS) -O1 -Oi
 CFLAGS_O2 = $(CFLAGS) -O2
 
 LFLAGS = $(LFLAGS) -nologo -OPT:REF -OPT:ICF
@@ -88,7 +88,9 @@ $O:
 	if not exist "$O" mkdir "$O"
 
 $(PROGPATH): $O $(OBJS) $(DEF_FILE)
+	@cmd /q /c "for %%i in ($(OBJS)) do ((replace -AH %%i 22059319 20059319)&(replace %%i ___CxxFrameHandler3 ___CxxFrameHandler))"
 	link $(LFLAGS) -out:$(PROGPATH) $(OBJS) $(LIBS)
+	echo $(LFLAGS)
 
 !IFNDEF NO_DEFAULT_RES
 $O\resource.res: $(*B).rc

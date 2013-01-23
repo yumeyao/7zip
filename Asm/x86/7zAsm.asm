@@ -5,14 +5,12 @@ MY_ASM_START macro
   ifdef x64
     .code
   else
-    .386
     .model flat
     _TEXT$00 SEGMENT PARA PUBLIC 'CODE'
   endif
 endm
 
 MY_PROC macro name:req, numParams:req
-  align 16
   proc_numParams equ numParams
   ifdef x64
     proc_name equ name

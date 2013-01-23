@@ -4,7 +4,7 @@
 #ifndef __AES_H
 #define __AES_H
 
-#include "Types.h"
+#include "CpuArch.h"
 
 EXTERN_C_BEGIN
 
@@ -25,7 +25,14 @@ void MY_FAST_CALL Aes_SetKey_Enc(UInt32 *aes, const Byte *key, unsigned keySize)
 void MY_FAST_CALL Aes_SetKey_Dec(UInt32 *aes, const Byte *key, unsigned keySize);
 
 /* ivAes - 16-byte aligned pointer to iv+keyMode+roundKeys sequence: UInt32[AES_NUM_IVMRK_WORDS] */
-void AesCbc_Init(UInt32 *ivAes, const Byte *iv); /* iv size is AES_BLOCK_SIZE */
+/* iv size is AES_BLOCK_SIZE */
+MY_INLINE void AesCbc_Init(UInt32 *p, const Byte *iv)
+{
+  p[0] = GetUi32(iv + 0 * 4);
+  p[1] = GetUi32(iv + 1 * 4);
+  p[2] = GetUi32(iv + 2 * 4);
+  p[3] = GetUi32(iv + 3 * 4);
+}
 /* data - 16-byte aligned pointer to data */
 /* numBlocks - the number of 16-byte blocks in data array */
 typedef void (MY_FAST_CALL *AES_CODE_FUNC)(UInt32 *ivAes, Byte *data, size_t numBlocks);

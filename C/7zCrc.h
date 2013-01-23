@@ -17,8 +17,18 @@ void MY_FAST_CALL CrcGenerateTable(void);
 #define CRC_GET_DIGEST(crc) ((crc) ^ CRC_INIT_VAL)
 #define CRC_UPDATE_BYTE(crc, b) (g_CrcTable[((crc) ^ (b)) & 0xFF] ^ ((crc) >> 8))
 
-UInt32 MY_FAST_CALL CrcUpdate(UInt32 crc, const void *data, size_t size);
-UInt32 MY_FAST_CALL CrcCalc(const void *data, size_t size);
+typedef UInt32 (MY_FAST_CALL *CRC_FUNC)(UInt32 v, const void *data, size_t size);
+extern CRC_FUNC g_CrcUpdate;
+
+MY_INLINE UInt32 CrcUpdate(UInt32 v, const void *data, size_t size)
+{
+  return g_CrcUpdate(v, data, size);
+}
+
+MY_INLINE UInt32 CrcCalc(const void *data, size_t size)
+{
+  return g_CrcUpdate(CRC_INIT_VAL, data, size) ^ CRC_INIT_VAL;
+}
 
 EXTERN_C_END
 

@@ -29,7 +29,43 @@ public:
 };
 
 STDMETHODIMP CByteSwap2::Init() { return S_OK; }
+STDMETHODIMP CByteSwap4::Init() { return S_OK; }
 
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+unsigned short __cdecl _byteswap_ushort(unsigned short);
+unsigned long __cdecl _byteswap_ulong(unsigned long);
+#pragma intrinsic(_byteswap_ushort)
+#pragma intrinsic(_byteswap_ulong)
+
+STDMETHODIMP_(UInt32) CByteSwap2::Filter(Byte *data, UInt32 size)
+{
+  UInt16 *p_data = (UInt16 *)data;
+  UInt16 *p_end = (UInt16 *)(data + size - 2);
+  while (p_data <= p_end)
+  {
+    UInt16 s = *p_data;
+	s = _byteswap_ushort(s);
+	*p_data = s;
+	p_data++;
+  }
+  return size & ~1;
+}
+
+STDMETHODIMP_(UInt32) CByteSwap4::Filter(Byte *data, UInt32 size)
+{
+  UInt32 *p_data = (UInt32 *)data;
+  UInt32 *p_end = (UInt32 *)(data + size - 4);
+  while (p_data <= p_end)
+  {
+    UInt32 l = *p_data;
+	l = _byteswap_ulong(l);
+	*p_data = l;
+	p_data++;
+  }
+  return size & ~3;
+}
+
+#else
 STDMETHODIMP_(UInt32) CByteSwap2::Filter(Byte *data, UInt32 size)
 {
   const UInt32 kStep = 2;
@@ -42,8 +78,6 @@ STDMETHODIMP_(UInt32) CByteSwap2::Filter(Byte *data, UInt32 size)
   }
   return i;
 }
-
-STDMETHODIMP CByteSwap4::Init() { return S_OK; }
 
 STDMETHODIMP_(UInt32) CByteSwap4::Filter(Byte *data, UInt32 size)
 {
@@ -60,6 +94,7 @@ STDMETHODIMP_(UInt32) CByteSwap4::Filter(Byte *data, UInt32 size)
   }
   return i;
 }
+#endif
 
 static void *CreateCodec2() { return (void *)(ICompressFilter *)(new CByteSwap2); }
 static void *CreateCodec4() { return (void *)(ICompressFilter *)(new CByteSwap4); }

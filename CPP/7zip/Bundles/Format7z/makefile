@@ -1,4 +1,5 @@
 PROG = 7za.dll
+LIBS = $(LIBS) kernel32.lib
 DEF_FILE = ../../Archive/Archive2.def
 CFLAGS = $(CFLAGS) -I ../../../ \
   -DDEFLATE_EXTRACT_ONLY \

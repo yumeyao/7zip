@@ -363,7 +363,7 @@ private:
 
   void FreeTempBuf()
   {
-    ::MyFree(TempBuf);
+    MyFree(TempBuf);
     TempBuf = NULL;
   }
 

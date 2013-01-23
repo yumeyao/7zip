@@ -213,13 +213,6 @@ static void Aes_Decode(const UInt32 *w, UInt32 *dest, const UInt32 *src)
   FD4(0); FD4(1); FD4(2); FD4(3);
 }
 
-void AesCbc_Init(UInt32 *p, const Byte *iv)
-{
-  unsigned i;
-  for (i = 0; i < 4; i++)
-    p[i] = GetUi32(iv + i * 4);
-}
-
 void MY_FAST_CALL AesCbc_Encode(UInt32 *p, Byte *data, size_t numBlocks)
 {
   for (; numBlocks != 0; numBlocks--, data += AES_BLOCK_SIZE)

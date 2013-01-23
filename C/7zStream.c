@@ -19,11 +19,6 @@ SRes SeqInStream_Read2(ISeqInStream *stream, void *buf, size_t size, SRes errorT
   return SZ_OK;
 }
 
-SRes SeqInStream_Read(ISeqInStream *stream, void *buf, size_t size)
-{
-  return SeqInStream_Read2(stream, buf, size, SZ_ERROR_INPUT_EOF);
-}
-
 SRes SeqInStream_ReadByte(ISeqInStream *stream, Byte *buf)
 {
   size_t processed = 1;
@@ -59,11 +54,6 @@ SRes LookInStream_Read2(ILookInStream *stream, void *buf, size_t size, SRes erro
     size -= processed;
   }
   return SZ_OK;
-}
-
-SRes LookInStream_Read(ILookInStream *stream, void *buf, size_t size)
-{
-  return LookInStream_Read2(stream, buf, size, SZ_ERROR_INPUT_EOF);
 }
 
 static SRes LookToRead_Look_Lookahead(void *pp, const void **buf, size_t *size)
@@ -139,11 +129,6 @@ void LookToRead_CreateVTable(CLookToRead *p, int lookahead)
   p->s.Skip = LookToRead_Skip;
   p->s.Read = LookToRead_Read;
   p->s.Seek = LookToRead_Seek;
-}
-
-void LookToRead_Init(CLookToRead *p)
-{
-  p->pos = p->size = 0;
 }
 
 static SRes SecToLook_Read(void *pp, void *buf, size_t *size)

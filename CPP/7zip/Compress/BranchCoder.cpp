@@ -11,6 +11,7 @@ STDMETHODIMP CBranchConverter::Init()
   return S_OK;
 }
 
+#pragma optimize("t", on)
 STDMETHODIMP_(UInt32) CBranchConverter::Filter(Byte *data, UInt32 size)
 {
   UInt32 processedSize = SubFilter(data, size);

@@ -9,23 +9,10 @@
 #define USE_ASM
 #endif
 
+#ifndef _MSC_VER
 #if defined(USE_ASM) && !defined(MY_CPU_AMD64)
 static UInt32 CheckFlag(UInt32 flag)
 {
-  #ifdef _MSC_VER
-  __asm pushfd;
-  __asm pop EAX;
-  __asm mov EDX, EAX;
-  __asm xor EAX, flag;
-  __asm push EAX;
-  __asm popfd;
-  __asm pushfd;
-  __asm pop EAX;
-  __asm xor EAX, EDX;
-  __asm push EDX;
-  __asm popfd;
-  __asm and flag, EAX;
-  #else
   __asm__ __volatile__ (
     "pushf\n\t"
     "pop  %%EAX\n\t"
@@ -40,10 +27,9 @@ static UInt32 CheckFlag(UInt32 flag)
     "popf\n\t"
     "andl %%EAX, %0\n\t":
     "=c" (flag) : "c" (flag));
-  #endif
   return flag;
 }
-#define CHECK_CPUID_IS_SUPPORTED if (CheckFlag(1 << 18) == 0 || CheckFlag(1 << 21) == 0) return False;
+#define CHECK_CPUID_IS_SUPPORTED if (CheckFlag(1 << 18 | 1 << 21) != (1 << 18 | 1 << 21)) return False;
 #else
 #define CHECK_CPUID_IS_SUPPORTED
 #endif
@@ -51,27 +37,6 @@ static UInt32 CheckFlag(UInt32 flag)
 static void MyCPUID(UInt32 function, UInt32 *a, UInt32 *b, UInt32 *c, UInt32 *d)
 {
   #ifdef USE_ASM
-
-  #ifdef _MSC_VER
-
-  UInt32 a2, b2, c2, d2;
-  __asm xor EBX, EBX;
-  __asm xor ECX, ECX;
-  __asm xor EDX, EDX;
-  __asm mov EAX, function;
-  __asm cpuid;
-  __asm mov a2, EAX;
-  __asm mov b2, EBX;
-  __asm mov c2, ECX;
-  __asm mov d2, EDX;
-
-  *a = a2;
-  *b = b2;
-  *c = c2;
-  *d = d2;
-
-  #else
-
   __asm__ __volatile__ (
     "cpuid"
     : "=a" (*a) ,
@@ -79,18 +44,13 @@ static void MyCPUID(UInt32 function, UInt32 *a, UInt32 *b, UInt32 *c, UInt32 *d)
       "=c" (*c) ,
       "=d" (*d)
     : "0" (function)) ;
-
-  #endif
-  
   #else
-
   int CPUInfo[4];
   __cpuid(CPUInfo, function);
   *a = CPUInfo[0];
   *b = CPUInfo[1];
   *c = CPUInfo[2];
   *d = CPUInfo[3];
-
   #endif
 }
 
@@ -101,6 +61,55 @@ Bool x86cpuid_CheckAndRead(Cx86cpuid *p)
   MyCPUID(1, &p->ver, &p->b, &p->c, &p->d);
   return True;
 }
+#else
+__declspec(naked)
+Bool x86cpuid_CheckAndRead(Cx86cpuid *p)
+{
+  __asm {
+  push  esi
+  mov   esi, ecx
+  pushfd
+  mov   ecx, (1 << 18) | (1 << 21)
+  pop   eax
+  mov   edx, eax
+  xor   eax, ecx
+  push  eax
+  popfd
+  pushfd
+  pop   eax
+  xor   eax, edx
+  push  edx
+  and   eax, ecx
+  popfd
+  xor   edx, edx
+  sub   ecx, eax
+  mov   eax, edx
+  jnz   Exit
+  push  ebx
+  xor   ebx, ebx
+  cpuid
+  mov   [esi], eax
+  mov   [esi+4], ebx
+  mov   [esi+8], edx
+  mov   [esi+12], ecx
+  xor   ecx, ecx
+  xor   ebx, ebx
+  lea   eax, [ecx+1]
+  xor   edx, edx
+  cpuid
+  mov   [esi+16], eax
+  mov   [esi+20], ebx
+  pop   ebx
+  mov   [esi+24], ecx
+  xor   eax, eax
+  mov   [esi+28], edx
+  inc   eax
+Exit:
+  pop   esi
+  ret
+  }
+}
+#endif
 
 static UInt32 kVendors[][3] =
 {

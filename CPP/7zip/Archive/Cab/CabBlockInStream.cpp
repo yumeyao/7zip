@@ -18,7 +18,7 @@ static const UInt32 kBlockSize = (1 << 16);
 bool CCabBlockInStream::Create()
 {
   if (!_buffer)
-    _buffer = (Byte *)::MyAlloc(kBlockSize);
+    _buffer = (Byte *)MyAlloc(kBlockSize);
   return (_buffer != 0);
 }
 

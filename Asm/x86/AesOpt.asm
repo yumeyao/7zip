@@ -3,11 +3,12 @@
 
 include 7zAsm.asm
 
-MY_ASM_START
-
 ifndef x64
+    .686
     .xmm
 endif
+
+MY_ASM_START
 
 ifdef x64
     num     equ r8
