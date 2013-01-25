@@ -1,4 +1,5 @@
 PROG = 7zFM.exe
+PROGIS7ZFMFULL = Yes
 CFLAGS = $(CFLAGS) -I ../../../ \
   -DLANG \
   -DNEW_FOLDER_INTERFACE \

@@ -31,7 +31,9 @@ LFLAGS = $(LFLAGS) /ENTRY:mainACRTStartup
 !ENDIF
 !ELSE
 !IFNDEF NEW_COMPILER
+!IF "$(CPU)" != "AMD64"
 LFLAGS = $(LFLAGS) -OPT:NOWIN98
+!ENDIF
 !ENDIF
 CFLAGS = $(CFLAGS) -Gr
 LIBS = $(LIBS) user32.lib advapi32.lib shell32.lib
@@ -59,6 +61,11 @@ CFLAGS = $(CFLAGS) -W4 -GS- -Zc:forScope
 CFLAGS = $(CFLAGS) -W3
 !ENDIF
 
+#!IF "$(CPU)" == "AMD64"
+#CFLAGS = $(CFLAGS) -GL
+#LFLAGS = $(LFLAGS) -LTCG
+#!ENDIF
+
 CFLAGS_O1 = $(CFLAGS) -O1 -Oi
 CFLAGS_O2 = $(CFLAGS) -O2
 
@@ -79,7 +86,17 @@ COMPL_O2   = $(CC) $(CFLAGS_O2) $**
 COMPL_PCH  = $(CC) $(CFLAGS_O1) -Yc"StdAfx.h" -Fp$O/a.pch $**
 COMPL      = $(CC) $(CFLAGS_O1) -Yu"StdAfx.h" -Fp$O/a.pch $**
 
-all: $(PROGPATH)
+all: $(PROGPATH) copy-target
+
+
+!IF "$(PROGIS7ZFMFULL)" == "Yes"
+COPYTARGET = $(COPYPATH)\7zFMFull.exe
+!ELSE
+COPYTARGET = $(COPYPATH)\$(PROG)
+!ENDIF
+
+copy-target: $(PROGPATH)
+	if not "$(COPYPATH)"=="" copy /y "$(PROGPATH)" "$(COPYTARGET)"
 
 clean:
 	-del /Q $(PROGPATH) $O\*.exe $O\*.dll $O\*.obj $O\*.lib $O\*.exp $O\*.res $O\*.pch
@@ -88,9 +105,8 @@ $O:
 	if not exist "$O" mkdir "$O"
 
 $(PROGPATH): $O $(OBJS) $(DEF_FILE)
-	@cmd /q /c "for %%i in ($(OBJS)) do ((replace -AH %%i 22059319 20059319)&(replace %%i ___CxxFrameHandler3 ___CxxFrameHandler))"
+	@cmd /q /c "for /f %%i in ('dir /b $O\*.obj') do ((replace -AH $O\%%i 22059319 20059319)&(replace $O\%%i __CxxFrameHandler3 __CxxFrameHandler))"
 	link $(LFLAGS) -out:$(PROGPATH) $(OBJS) $(LIBS)
-	echo $(LFLAGS)
 
 !IFNDEF NO_DEFAULT_RES
 $O\resource.res: $(*B).rc

@@ -9,7 +9,56 @@
 #define USE_ASM
 #endif
 
-#ifndef _MSC_VER
+#if defined(_MSC_VER) && !defined(MY_CPU_AMD64)
+__declspec(naked)
+Bool x86cpuid_CheckAndRead(Cx86cpuid *p)
+{
+  __asm {
+  push  esi
+  mov   esi, ecx
+  pushfd
+  mov   ecx, (1 << 18) | (1 << 21)
+  pop   eax
+  mov   edx, eax
+  xor   eax, ecx
+  push  eax
+  popfd
+  pushfd
+  pop   eax
+  xor   eax, edx
+  push  edx
+  and   eax, ecx
+  popfd
+  xor   edx, edx
+  sub   ecx, eax
+  mov   eax, edx
+  jnz   Exit
+  push  ebx
+  xor   ebx, ebx
+  cpuid
+  mov   [esi], eax
+  mov   [esi+4], ebx
+  mov   [esi+8], edx
+  mov   [esi+12], ecx
+  xor   ecx, ecx
+  xor   ebx, ebx
+  lea   eax, [ecx+1]
+  xor   edx, edx
+  cpuid
+  mov   [esi+16], eax
+  mov   [esi+20], ebx
+  pop   ebx
+  mov   [esi+24], ecx
+  xor   eax, eax
+  mov   [esi+28], edx
+  inc   eax
+Exit:
+  pop   esi
+  ret
+  }
+}
+#else
+
 #if defined(USE_ASM) && !defined(MY_CPU_AMD64)
 static UInt32 CheckFlag(UInt32 flag)
 {
@@ -60,54 +109,6 @@ Bool x86cpuid_CheckAndRead(Cx86cpuid *p)
   MyCPUID(0, &p->maxFunc, &p->vendor[0], &p->vendor[2], &p->vendor[1]);
   MyCPUID(1, &p->ver, &p->b, &p->c, &p->d);
   return True;
-}
-#else
-__declspec(naked)
-Bool x86cpuid_CheckAndRead(Cx86cpuid *p)
-{
-  __asm {
-  push  esi
-  mov   esi, ecx
-  pushfd
-  mov   ecx, (1 << 18) | (1 << 21)
-  pop   eax
-  mov   edx, eax
-  xor   eax, ecx
-  push  eax
-  popfd
-  pushfd
-  pop   eax
-  xor   eax, edx
-  push  edx
-  and   eax, ecx
-  popfd
-  xor   edx, edx
-  sub   ecx, eax
-  mov   eax, edx
-  jnz   Exit
-  push  ebx
-  xor   ebx, ebx
-  cpuid
-  mov   [esi], eax
-  mov   [esi+4], ebx
-  mov   [esi+8], edx
-  mov   [esi+12], ecx
-  xor   ecx, ecx
-  xor   ebx, ebx
-  lea   eax, [ecx+1]
-  xor   edx, edx
-  cpuid
-  mov   [esi+16], eax
-  mov   [esi+20], ebx
-  pop   ebx
-  mov   [esi+24], ecx
-  xor   eax, eax
-  mov   [esi+28], edx
-  inc   eax
-Exit:
-  pop   esi
-  ret
-  }
 }
 #endif
 
