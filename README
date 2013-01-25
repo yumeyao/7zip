@@ -1,0 +1,18 @@
+To start:
+
+INC: CRT from WINDDK 3790.1830 (2003 SP1 DDK)
+     WIN from WINSDK v7.1
+LIB: Custom lib
+     CRT from WINDDK 3790.1830 (2003 SP1 DDK)
+     WIN from WINSDK v7.1
+
+x86:
+ CL: VC8
+LNK: VC8
+
+x64:
+ CL: VC11
+LNK: VC8
+
+replace.exe is a binary replacing tool. It's useful to remove VC8(and above) dependency so the target could be linked to VC6 lib successfully.
+Custom lib contains libs with __security_cookie (cl option - /GS) removed.

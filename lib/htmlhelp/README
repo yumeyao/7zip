@@ -1,0 +1,2 @@
+This is designed to remove the original stupid __security_cookie dependency since Windows 2003 SDK.
+The lib in VC6 doesn't have this dependency but lacks the functionality to expand REG_EXPAND_SZ to full path.
