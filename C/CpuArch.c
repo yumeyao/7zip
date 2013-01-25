@@ -11,7 +11,7 @@
 
 #if defined(_MSC_VER) && !defined(MY_CPU_AMD64)
 __declspec(naked)
-Bool x86cpuid_CheckAndRead(Cx86cpuid *p)
+Bool MY_FAST_CALL x86cpuid_CheckAndRead(Cx86cpuid *p)
 {
   __asm {
   push  esi
@@ -103,7 +103,7 @@ static void MyCPUID(UInt32 function, UInt32 *a, UInt32 *b, UInt32 *c, UInt32 *d)
   #endif
 }
 
-Bool x86cpuid_CheckAndRead(Cx86cpuid *p)
+Bool MY_FAST_CALL x86cpuid_CheckAndRead(Cx86cpuid *p)
 {
   CHECK_CPUID_IS_SUPPORTED
   MyCPUID(0, &p->maxFunc, &p->vendor[0], &p->vendor[2], &p->vendor[1]);
