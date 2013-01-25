@@ -96,6 +96,7 @@ MY_EPILOG macro crc_end:req, crc_end_early:req
     MY_POP_4_REGS
 endm
 
+ifndef x64
 MY_PROC CrcUpdateT8, 3
     MY_PROLOG crc_end_8, crc_end_8_early
     mov     x1, [SRCDAT 1]
@@ -131,7 +132,6 @@ endif
     MY_EPILOG crc_end_8, crc_end_8_early
 MY_ENDP
 
-ifndef x64
 db 'Y', 'a', 'o'
 endif
 

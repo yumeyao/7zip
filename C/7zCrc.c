@@ -8,20 +8,22 @@
 
 #ifdef MY_CPU_X86_OR_AMD64
   #define CRC_NUM_TABLES 8
+#ifndef MY_CPU_AMD64
   UInt32 MY_FAST_CALL CrcUpdateT8(UInt32 v, const void *data, size_t size);
+#endif
 #elif defined(MY_CPU_LE)
   #define CRC_NUM_TABLES 4
 #else
   #define CRC_NUM_TABLES 5
   #define CRC_UINT32_SWAP(v) ((v >> 24) | ((v >> 8) & 0xFF00) | ((v << 8) & 0xFF0000) | (v << 24))
-  UInt32 MY_FAST_CALL CrcUpdateT1_BeT4(UInt32 v, const void *data, size_t size, const UInt32 *table);
 #endif
 
-#ifndef MY_CPU_BE
+#if !defined(MY_CPU_AMD64) && !defined(MY_CPU_BE)
+  UInt32 MY_FAST_CALL CrcUpdateT1_BeT4(UInt32 v, const void *data, size_t size);
   UInt32 MY_FAST_CALL CrcUpdateT4(UInt32 v, const void *data, size_t size);
+  CRC_FUNC g_CrcUpdate;
 #endif
 
-CRC_FUNC g_CrcUpdate;
 UInt32 g_CrcTable[256 * CRC_NUM_TABLES];
 
 void MY_FAST_CALL CrcGenerateTable()
@@ -41,6 +43,7 @@ void MY_FAST_CALL CrcGenerateTable()
     g_CrcTable[i] = g_CrcTable[r & 0xFF] ^ (r >> 8);
   }
   
+#ifndef MY_CPU_AMD64
   #ifdef MY_CPU_LE
 
   g_CrcUpdate = CrcUpdateT4;
@@ -56,16 +59,18 @@ void MY_FAST_CALL CrcGenerateTable()
     UInt32 k = 1;
     if (*(const Byte *)&k == 1)
       g_CrcUpdate = CrcUpdateT4;
-    else
-    #endif
+    else {
+      g_CrcUpdate = CrcUpdateT1_BeT4;
+    #else
     {
+    #endif
       for (i = 256 * CRC_NUM_TABLES - 1; i >= 256; i--)
       {
         UInt32 x = g_CrcTable[i - 256];
         g_CrcTable[i] = CRC_UINT32_SWAP(x);
       }
-      g_CrcUpdate = CrcUpdateT1_BeT4;
     }
   }
   #endif
+#endif
 }

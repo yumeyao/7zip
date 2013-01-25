@@ -133,6 +133,7 @@ int x86cpuid_GetFirm(const Cx86cpuid *p)
   return -1;
 }
 
+#ifndef MY_CPU_AMD64
 Bool CPU_Is_InOrder()
 {
   Cx86cpuid p;
@@ -151,6 +152,7 @@ Bool CPU_Is_InOrder()
   }
   return True;
 }
+#endif
 
 #if !defined(MY_CPU_AMD64) && defined(_WIN32)
 static Bool CPU_Sys_Is_SSE_Supported()
